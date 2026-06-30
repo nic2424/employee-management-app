@@ -1,7 +1,12 @@
 pipeline {
     agent any
 
+    environment {
+        SCANNER_HOME = tool 'SonarQube'
+    }
+
     stages {
+
         stage('Checkout') {
             steps {
                 checkout scm
@@ -12,6 +17,22 @@ pipeline {
             steps {
                 sh 'chmod +x gradlew'
                 sh './gradlew clean build'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv('Sonar_Qube') {
+                    sh './gradlew sonar'
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps {
+                timeout(time: 2, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
             }
         }
 
