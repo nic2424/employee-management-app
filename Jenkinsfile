@@ -21,13 +21,17 @@ pipeline {
         }
 
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv('Sonar_Qube') {
-                    sh './gradlew sonar'
-                }
-            }
+    steps {
+        withSonarQubeEnv('Sonar_Qube') {
+            sh '''
+            echo "Host: $SONAR_HOST_URL"
+            echo "Token length: ${#SONAR_AUTH_TOKEN}"
+            env | grep SONAR
+            ./gradlew sonar --info
+            '''
         }
-
+    }
+}
         stage('Quality Gate') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
