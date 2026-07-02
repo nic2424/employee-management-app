@@ -41,11 +41,13 @@ pipeline {
         }
 
         stage('Docker Build') {
-            steps {
-                sh 'docker build -t employee-management-app:v1 .'
-            }
-        }
-
+    steps {
+        sh '''
+        docker build -t vipintomar/employee-management-app:latest .
+        docker tag vipintomar/employee-management-app:latest vipintomar/employee-management-app:${BUILD_NUMBER}
+        '''
+    }
+}
         stage('Deploy') {
             steps {
                 sh '''
