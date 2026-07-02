@@ -48,11 +48,36 @@ pipeline {
         '''
     }
 }
+
+stage('Docker Login') {
+    steps {
+        withCredentials([usernamePassword(
+            credentialsId: 'dockerhub',
+            usernameVariable: 'DOCKER_USER',
+            passwordVariable: 'DOCKER_PASS'
+        )]) {
+            sh '''
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            '''
+        }
+    }
+}
+
+stage('Docker Push') {
+    steps {
+        sh '''
+        docker push vipintomar/employee-management-app:latest
+        docker push vipintomar/employee-management-app:${BUILD_NUMBER}
+        '''
+    }
+}
+
+
         stage('Deploy') {
             steps {
                 sh '''
                 docker rm -f employee-app || true
-                docker run -d --name employee-app -p 8083:8080 employee-management-app:v1
+                docker run -d --name employee-app -p 8083:8080  vipintomar/employee-management-app:latest
                 '''
             }
         }
